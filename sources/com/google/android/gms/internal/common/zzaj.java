@@ -1,0 +1,17 @@
+package com.google.android.gms.internal.common;
+
+import com.google.errorprone.annotations.DoNotCall;
+import java.util.Iterator;
+import org.jspecify.nullness.NullMarked;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+@NullMarked
+public abstract class zzaj implements Iterator {
+    @Override // java.util.Iterator
+    @DoNotCall("Always throws UnsupportedOperationException")
+    @Deprecated
+    public final void remove() {
+        throw new UnsupportedOperationException();
+    }
+}

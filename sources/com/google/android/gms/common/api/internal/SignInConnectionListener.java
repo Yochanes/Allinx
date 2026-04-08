@@ -1,0 +1,11 @@
+package com.google.android.gms.common.api.internal;
+
+import com.google.android.gms.common.annotation.KeepForSdk;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+@KeepForSdk
+public interface SignInConnectionListener {
+    @KeepForSdk
+    void onComplete();
+}

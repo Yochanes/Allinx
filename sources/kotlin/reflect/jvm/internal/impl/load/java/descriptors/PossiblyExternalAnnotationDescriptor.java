@@ -1,0 +1,10 @@
+package kotlin.reflect.jvm.internal.impl.load.java.descriptors;
+
+import kotlin.reflect.jvm.internal.impl.descriptors.annotations.AnnotationDescriptor;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes3.dex */
+public interface PossiblyExternalAnnotationDescriptor extends AnnotationDescriptor {
+    /* JADX INFO: renamed from: b */
+    boolean mo19212b();
+}

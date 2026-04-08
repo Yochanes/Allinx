@@ -1,0 +1,19 @@
+package org.checkerframework.checker.units.qual;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.checkerframework.framework.qual.SubtypeOf;
+
+/* JADX INFO: renamed from: org.checkerframework.checker.units.qual.km */
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes3.dex */
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
+@UnitsMultiple
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@SubtypeOf
+public @interface InterfaceC6388km {
+}

@@ -1,0 +1,11 @@
+package com.google.android.gms.internal.measurement;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+interface zzmj {
+    zzml zza();
+
+    zzmw zzb();
+
+    boolean zzc();
+}

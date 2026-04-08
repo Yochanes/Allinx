@@ -1,0 +1,27 @@
+package org.koin.core.definition;
+
+import kotlin.Metadata;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes3.dex */
+@Metadata(m18301d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0000\n\u0000\b\u0086\b\u0018\u0000*\u0004\b\u0000\u0010\u00012\u00020\u0002¨\u0006\u0003"}, m18302d2 = {"Lorg/koin/core/definition/Callbacks;", "T", "", "koin-core"}, m18303k = 1, m18304mv = {1, 9, 0}, m18306xi = 48)
+public final /* data */ class Callbacks<T> {
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Callbacks)) {
+            return false;
+        }
+        ((Callbacks) obj).getClass();
+        return true;
+    }
+
+    public final int hashCode() {
+        return 0;
+    }
+
+    public final String toString() {
+        return "Callbacks(onClose=null)";
+    }
+}

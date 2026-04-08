@@ -1,0 +1,40 @@
+package androidx.compose.p013ui.layout;
+
+import java.util.Map;
+import kotlin.Metadata;
+import kotlin.jvm.functions.Function1;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes.dex */
+@Metadata(m18301d1 = {"\u0000\b\n\u0000\n\u0002\u0018\u0002\n\u0000\b\n\u0018\u00002\u00020\u0001¨\u0006\u0002"}, m18302d2 = {"androidx/compose/ui/layout/LayoutNodeSubcompositionsState$createMeasureResult$1", "Landroidx/compose/ui/layout/MeasureResult;", "ui_release"}, m18303k = 1, m18304mv = {1, 9, 0}, m18306xi = 48)
+public final class LayoutNodeSubcompositionsState$createMeasureResult$1 implements MeasureResult {
+    @Override // androidx.compose.p013ui.layout.MeasureResult
+    /* JADX INFO: renamed from: getHeight */
+    public final int getF18467b() {
+        throw null;
+    }
+
+    @Override // androidx.compose.p013ui.layout.MeasureResult
+    /* JADX INFO: renamed from: getWidth */
+    public final int getF18466a() {
+        throw null;
+    }
+
+    @Override // androidx.compose.p013ui.layout.MeasureResult
+    /* JADX INFO: renamed from: p */
+    public final Map getF18468c() {
+        throw null;
+    }
+
+    @Override // androidx.compose.p013ui.layout.MeasureResult
+    /* JADX INFO: renamed from: q */
+    public final void mo2942q() {
+        throw null;
+    }
+
+    @Override // androidx.compose.p013ui.layout.MeasureResult
+    /* JADX INFO: renamed from: r */
+    public final Function1 mo2943r() {
+        throw null;
+    }
+}

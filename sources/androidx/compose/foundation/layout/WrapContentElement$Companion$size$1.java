@@ -1,0 +1,29 @@
+package androidx.compose.foundation.layout;
+
+import androidx.compose.p013ui.Alignment;
+import androidx.compose.p013ui.unit.IntOffset;
+import androidx.compose.p013ui.unit.IntSize;
+import androidx.compose.p013ui.unit.LayoutDirection;
+import kotlin.Metadata;
+import kotlin.jvm.functions.Function2;
+import kotlin.jvm.internal.Lambda;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes.dex */
+@Metadata(m18301d1 = {"\u0000\u0016\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\u0010\u0000\u001a\u00020\u00012\u0006\u0010\u0002\u001a\u00020\u00032\u0006\u0010\u0004\u001a\u00020\u0005H\n¢\u0006\u0004\b\u0006\u0010\u0007"}, m18302d2 = {"<anonymous>", "Landroidx/compose/ui/unit/IntOffset;", "size", "Landroidx/compose/ui/unit/IntSize;", "layoutDirection", "Landroidx/compose/ui/unit/LayoutDirection;", "invoke-5SAbXVA", "(JLandroidx/compose/ui/unit/LayoutDirection;)J"}, m18303k = 3, m18304mv = {1, 9, 0}, m18306xi = 48)
+final class WrapContentElement$Companion$size$1 extends Lambda implements Function2<IntSize, LayoutDirection, IntOffset> {
+
+    /* JADX INFO: renamed from: a */
+    public final /* synthetic */ Alignment f6706a;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public WrapContentElement$Companion$size$1(Alignment alignment) {
+        super(2);
+        this.f6706a = alignment;
+    }
+
+    @Override // kotlin.jvm.functions.Function2
+    public final Object invoke(Object obj, Object obj2) {
+        return new IntOffset(this.f6706a.mo4857a(0L, ((IntSize) obj).f20568a, (LayoutDirection) obj2));
+    }
+}

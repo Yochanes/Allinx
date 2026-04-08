@@ -1,0 +1,12 @@
+package com.google.android.datatransport.runtime.time;
+
+import android.os.SystemClock;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+public class UptimeClock implements Clock {
+    @Override // com.google.android.datatransport.runtime.time.Clock
+    public long getTime() {
+        return SystemClock.elapsedRealtime();
+    }
+}

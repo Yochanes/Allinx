@@ -1,0 +1,18 @@
+package androidx.camera.extensions;
+
+import androidx.annotation.RequiresApi;
+import androidx.annotation.RestrictTo;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes.dex */
+@RequiresApi
+public final class ExtensionMode {
+
+    /* JADX INFO: compiled from: Proguard */
+    @Retention(RetentionPolicy.SOURCE)
+    @RestrictTo
+    public @interface Mode {
+    }
+}

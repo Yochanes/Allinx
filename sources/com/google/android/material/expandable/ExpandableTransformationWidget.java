@@ -1,0 +1,12 @@
+package com.google.android.material.expandable;
+
+import androidx.annotation.IdRes;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+public interface ExpandableTransformationWidget extends ExpandableWidget {
+    @IdRes
+    int getExpandedComponentIdHint();
+
+    void setExpandedComponentIdHint(@IdRes int i);
+}

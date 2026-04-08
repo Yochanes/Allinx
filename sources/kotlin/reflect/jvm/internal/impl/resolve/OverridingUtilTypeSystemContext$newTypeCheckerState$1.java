@@ -1,0 +1,21 @@
+package kotlin.reflect.jvm.internal.impl.resolve;
+
+import kotlin.reflect.jvm.internal.impl.types.KotlinType;
+import kotlin.reflect.jvm.internal.impl.types.TypeCheckerState;
+import kotlin.reflect.jvm.internal.impl.types.model.KotlinTypeMarker;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes3.dex */
+public final class OverridingUtilTypeSystemContext$newTypeCheckerState$1 extends TypeCheckerState {
+    @Override // kotlin.reflect.jvm.internal.impl.types.TypeCheckerState
+    /* JADX INFO: renamed from: b */
+    public final boolean mo19948b(KotlinTypeMarker kotlinTypeMarker, KotlinTypeMarker kotlinTypeMarker2) {
+        if (!(kotlinTypeMarker instanceof KotlinType)) {
+            throw new IllegalArgumentException("Failed requirement.");
+        }
+        if (kotlinTypeMarker2 instanceof KotlinType) {
+            throw null;
+        }
+        throw new IllegalArgumentException("Failed requirement.");
+    }
+}

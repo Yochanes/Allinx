@@ -1,0 +1,79 @@
+package io.reactivex.rxjava3.internal.operators.observable;
+
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.exceptions.Exceptions;
+import io.reactivex.rxjava3.internal.disposables.DisposableHelper;
+import io.reactivex.rxjava3.internal.disposables.EmptyDisposable;
+import io.reactivex.rxjava3.plugins.RxJavaPlugins;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes3.dex */
+public final class ObservableZipIterable<T, U, V> extends Observable<V> {
+
+    /* JADX INFO: compiled from: Proguard */
+    public static final class ZipIterableObserver<T, U, V> implements Observer<T>, Disposable {
+
+        /* JADX INFO: renamed from: a */
+        public Disposable f50964a;
+
+        /* JADX INFO: renamed from: b */
+        public boolean f50965b;
+
+        @Override // io.reactivex.rxjava3.core.Observer
+        /* JADX INFO: renamed from: c */
+        public final void mo12365c(Disposable disposable) {
+            if (DisposableHelper.m17956f(this.f50964a, disposable)) {
+                this.f50964a = disposable;
+                throw null;
+            }
+        }
+
+        @Override // io.reactivex.rxjava3.disposables.Disposable
+        /* JADX INFO: renamed from: d */
+        public final boolean mo12353d() {
+            return this.f50964a.mo12353d();
+        }
+
+        @Override // io.reactivex.rxjava3.disposables.Disposable
+        public final void dispose() {
+            this.f50964a.dispose();
+        }
+
+        @Override // io.reactivex.rxjava3.core.Observer
+        public final void onComplete() {
+            if (this.f50965b) {
+                return;
+            }
+            this.f50965b = true;
+            throw null;
+        }
+
+        @Override // io.reactivex.rxjava3.core.Observer
+        public final void onError(Throwable th) {
+            if (this.f50965b) {
+                RxJavaPlugins.m18275b(th);
+            } else {
+                this.f50965b = true;
+                throw null;
+            }
+        }
+
+        @Override // io.reactivex.rxjava3.core.Observer
+        public final void onNext(Object obj) {
+            throw null;
+        }
+    }
+
+    @Override // io.reactivex.rxjava3.core.Observable
+    /* JADX INFO: renamed from: h */
+    public final void mo12361h(Observer observer) {
+        try {
+            throw null;
+        } catch (Throwable th) {
+            Exceptions.m17950a(th);
+            EmptyDisposable.m17960f(th, observer);
+        }
+    }
+}

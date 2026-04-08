@@ -1,0 +1,19 @@
+package com.google.common.hash;
+
+import com.google.common.annotations.GwtCompatible;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.annotation.Nonnull;
+import javax.annotation.meta.TypeQualifierDefault;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+@Target({ElementType.TYPE})
+@TypeQualifierDefault
+@Nonnull
+@GwtCompatible
+@Retention(RetentionPolicy.RUNTIME)
+@interface ElementTypesAreNonnullByDefault {
+}

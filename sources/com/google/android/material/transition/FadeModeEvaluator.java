@@ -1,0 +1,7 @@
+package com.google.android.material.transition;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+interface FadeModeEvaluator {
+    FadeModeResult evaluate(float f, float f2, float f3, float f4);
+}

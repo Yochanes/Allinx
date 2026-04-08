@@ -1,0 +1,34 @@
+package androidx.compose.p013ui.platform;
+
+import android.view.View;
+import kotlin.Metadata;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.internal.Lambda;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes.dex */
+@Metadata(m18301d1 = {"\u0000\u0010\n\u0000\n\u0002\u0010\u000b\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\u0010\u0000\u001a\u00020\u00012\u0006\u0010\u0002\u001a\u00020\u0003H\n¢\u0006\u0004\b\u0004\u0010\u0005"}, m18302d2 = {"<anonymous>", "", "t", "Landroid/view/View;", "invoke", "(Landroid/view/View;)Ljava/lang/Boolean;"}, m18303k = 3, m18304mv = {1, 9, 0}, m18306xi = 48)
+final class FocusFinderCompat_androidKt$findUserSetNextFocus$1 extends Lambda implements Function1<View, Boolean> {
+    @Override // kotlin.jvm.functions.Function1
+    public final Object invoke(Object obj) {
+        View view = (View) obj;
+        FocusFinderCompat_androidKt$findViewInsideOutShouldExist$1 focusFinderCompat_androidKt$findViewInsideOutShouldExist$1 = new FocusFinderCompat_androidKt$findViewInsideOutShouldExist$1(view.getNextFocusForwardId());
+        View view2 = null;
+        View view3 = null;
+        while (true) {
+            View viewM6145a = FocusFinderCompat_androidKt.m6145a(view, focusFinderCompat_androidKt$findViewInsideOutShouldExist$1, view3);
+            if (viewM6145a != null) {
+                view2 = viewM6145a;
+                break;
+            }
+            Object parent = view.getParent();
+            if (parent == null || !(parent instanceof View)) {
+                break;
+            }
+            View view4 = (View) parent;
+            view3 = view;
+            view = view4;
+        }
+        return Boolean.valueOf(view2 == null);
+    }
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt"
+    android:height="84dp"
+    android:width="166dp"
+    android:viewportWidth="166"
+    android:viewportHeight="84">
+    <path
+        android:fillColor="#5056c8"
+        android:pathData="M0,10C0,4.48 4.48,0 10,0H166L146,84H10C4.48,84 0,79.52 0,74V10Z"/>
+    <group>
+        <clip-path android:pathData="M0,10C0,4.48 4.48,0 10,0H166L146,84H10C4.48,84 0,79.52 0,74V10Z"/>
+        <path
+            android:fillColor="@drawable/_ic_guess_detail_btn_left__0_res_0x7f080006"
+            android:pathData="M147.5,76.5m-20.5,0a20.5,20.5 0,1 1,41 0a20.5,20.5 0,1 1,-41 0"
+            android:strokeAlpha="0.1"
+            android:fillAlpha="0.1"/>
+    </group>
+</vector>

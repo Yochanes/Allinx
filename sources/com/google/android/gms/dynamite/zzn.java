@@ -1,0 +1,15 @@
+package com.google.android.gms.dynamite;
+
+import android.database.Cursor;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+final class zzn {
+    public Cursor zza;
+
+    private zzn() {
+    }
+
+    public /* synthetic */ zzn(zzm zzmVar) {
+    }
+}

@@ -1,0 +1,15 @@
+package io.ktor.http.cio;
+
+import kotlin.Metadata;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes3.dex */
+@Metadata(m18301d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, m18302d2 = {"ktor-http-cio"}, m18303k = 2, m18304mv = {1, 4, 2})
+public final class HttpHeadersMapKt {
+
+    /* JADX INFO: renamed from: a */
+    public static final int[] f45805a = new int[0];
+
+    /* JADX INFO: renamed from: b */
+    public static final HttpHeadersMapKt$IntArrayPool$1 f45806b = new HttpHeadersMapKt$IntArrayPool$1(1000);
+}

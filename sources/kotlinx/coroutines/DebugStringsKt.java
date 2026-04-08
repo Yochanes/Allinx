@@ -1,0 +1,36 @@
+package kotlinx.coroutines;
+
+import kotlin.Metadata;
+import kotlin.Result;
+import kotlin.ResultKt;
+import kotlin.coroutines.Continuation;
+import kotlin.jvm.internal.SourceDebugExtension;
+import kotlinx.coroutines.internal.DispatchedContinuation;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes3.dex */
+@Metadata(m18301d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, m18302d2 = {"kotlinx-coroutines-core"}, m18303k = 2, m18304mv = {2, 0, 0}, m18306xi = 48)
+@SourceDebugExtension
+public final class DebugStringsKt {
+    /* JADX INFO: renamed from: a */
+    public static final String m20565a(Object obj) {
+        return Integer.toHexString(System.identityHashCode(obj));
+    }
+
+    /* JADX INFO: renamed from: b */
+    public static final String m20566b(Continuation continuation) {
+        Object objM18312a;
+        if (continuation instanceof DispatchedContinuation) {
+            return ((DispatchedContinuation) continuation).toString();
+        }
+        try {
+            objM18312a = continuation + '@' + m20565a(continuation);
+        } catch (Throwable th) {
+            objM18312a = ResultKt.m18312a(th);
+        }
+        if (Result.m18311a(objM18312a) != null) {
+            objM18312a = continuation.getClass().getName() + '@' + m20565a(continuation);
+        }
+        return (String) objM18312a;
+    }
+}

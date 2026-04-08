@@ -1,0 +1,12 @@
+package com.google.errorprone.annotations;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
+/* JADX INFO: compiled from: Proguard */
+/* JADX INFO: loaded from: classes2.dex */
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
+@Documented
+public @interface MustBeClosed {
+}
