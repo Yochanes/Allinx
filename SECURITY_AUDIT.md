@@ -1,185 +1,185 @@
-# Отчет по безопасности APK (static review)
+# Глубокий аудит уязвимостей APK (реальные атаки + критерии)
 
-**Дата анализа:** 2026-04-08  
-**Формат:** статический анализ декомпилированных исходников (`sources/`) и манифеста (`resources/AndroidManifest.xml`) без динамического запуска.  
-**Ограничение:** это white-box static-only аудит; часть уязвимостей может требовать runtime-подтверждения.
-
----
-
-## 1) Критические и высокие риски
-
-### V-01: Разрешен cleartext-трафик на уровне приложения
-- **Факт:** в `AndroidManifest.xml` включен `android:usesCleartextTraffic="true"`.
-- **Где:** `resources/AndroidManifest.xml`.
-- **Риск:** при любой ошибке в URL/редиректах/SDK-конфиге появляется возможность передачи данных по HTTP (MITM, перехват токенов/PII в небезопасной сети).
-- **Severity:** **High**
-- **CWE:** CWE-319 (Cleartext Transmission of Sensitive Information)
-- **MASVS:** MASVS-NETWORK
-- **Критерии подтверждения:**
-  1. Флаг cleartext включен в манифесте.
-  2. В приложении есть сетевой стек и чувствительные данные (токены/логин-данные).
-  3. Не задана строгая network security config, запрещающая cleartext по доменам.
-- **Рекомендации:**
-  - Поставить `android:usesCleartextTraffic="false"`.
-  - Добавить `networkSecurityConfig` с явным allowlist только HTTPS.
-  - В CI добавить линтер-проверку, запрещающую cleartext в release.
-
-### V-02: Включен backup приложения + хранение чувствительных данных в prefs
-- **Факт:** `android:allowBackup="true"`, при этом в конфиге присутствует хранение `token`/`loginData` в `SharedPref`.
-- **Где:** `resources/AndroidManifest.xml`, `sources/com/exchange/allin/config/AppConfig.java`.
-- **Риск:** выгрузка данных через adb backup/облачный backup/компрометированное устройство может привести к утечке токена сессии и профиля пользователя.
-- **Severity:** **High**
-- **CWE:** CWE-312 (Cleartext Storage of Sensitive Information)
-- **MASVS:** MASVS-STORAGE
-- **Критерии подтверждения:**
-  1. Backup включен в manifest.
-  2. Секреты (token/session/loginData) сохраняются локально.
-  3. Не используется шифрование через Android Keystore/EncryptedSharedPreferences.
-- **Рекомендации:**
-  - Для release отключить backup (`allowBackup=false`) либо исключить секреты через backup rules.
-  - Токены и чувствительные поля хранить в EncryptedSharedPreferences + ключи в Keystore.
-  - Ввести ротацию refresh/access-токенов при подозрении на компрометацию.
-
-### V-03: Debug-режим push SDK включен в `onCreate`
-- **Факт:** `MTCorePrivatesApi.configDebugMode(this, true);`.
-- **Где:** `sources/com/exchange/allin/App.java`.
-- **Риск:** расширенное логирование/диагностика в прод-сборке может раскрывать служебные детали и сетевые параметры, облегчая реверс и эксплуатацию.
-- **Severity:** **Medium/High** (в зависимости от фактического вывода SDK)
-- **CWE:** CWE-489 (Active Debug Code)
-- **MASVS:** MASVS-RESILIENCE / MASVS-PRIVACY
-- **Критерии подтверждения:**
-  1. Debug явно выставлен в true в production code path.
-  2. SDK использует debug-флаги для verbose-телеметрии/логов.
-- **Рекомендации:**
-  - Ограничить debug только для debug flavor/buildType.
-  - Гейт через `BuildConfig.DEBUG`.
+**Дата:** 2026-04-08  
+**Метод:** статический white-box анализ `resources/AndroidManifest.xml`, `resources/res/xml/*`, `sources/**` (декомпилированный код).  
+**Важно:** ниже я разделил **подтвержденные риски**, **реалистичные атаки**, и **гипотезы, требующие динамики**.
 
 ---
 
-## 2) Средние риски и потенциальные уязвимости
+## 1) Модель угроз (что реально можно атаковать)
 
-### V-04: Утечка чувствительных данных через WebView console log
-- **Факт:** логируется весь `consoleMessage.message()` из WebView в `Log.d("WebViewLog", ...)`.
-- **Где:**
-  - `sources/com/exchange/allin/p024ui/page/account/web/WebPageKt$WebPage$1$1$1$3.java`
-  - `sources/com/exchange/allin/p024ui/page/nexus/NexusPageKt$NexusPage$1$1$1$3.java`
-- **Риск:** если web-контент выводит токены/PII в JS console, эти данные оказываются в device logs.
-- **Severity:** **Medium**
-- **CWE:** CWE-532 (Insertion of Sensitive Information into Log File)
-- **MASVS:** MASVS-PRIVACY
-- **Критерии подтверждения:**
-  1. В коде присутствует вывод console message в лог.
-  2. В WebView загружается удаленный/динамический контент.
-- **Рекомендации:**
-  - Убрать логирование console в release.
-  - Маскировать возможные секреты.
-
-### V-05: Потенциальное раскрытие stacktrace в runtime
-- **Факт:** `e.printStackTrace()` при ошибке DNS.
-- **Где:** `sources/com/exchange/allin/net/dns/HttpDns.java`.
-- **Риск:** в некоторых окружениях stacktrace доступен через системные логи, может помогать в атаке (инфо-disclosure).
-- **Severity:** **Low/Medium**
-- **CWE:** CWE-209 (Information Exposure Through an Error Message)
-- **Рекомендации:**
-  - Заменить на централизованный безопасный logger без деталей в release.
-
-### V-06: Экспортированный BroadcastReceiver под системные action
-- **Факт:** `com.chiclaim.android.downloader.SystemDownloadReceiver` экспортирован (`android:exported="true"`).
-- **Где:** `resources/AndroidManifest.xml`.
-- **Риск:** расширение attack surface; возможны попытки спуфинга broadcast (хотя есть проверка download id и DownloadManager URI, что снижает риск до moderate/low).
-- **Severity:** **Medium (hardening issue)**
-- **CWE:** CWE-926 (Improper Export of Android Components)
-- **Критерии подтверждения:**
-  1. Компонент exported=true.
-  2. Нет permission-gate/валидации отправителя.
-- **Рекомендации:**
-  - Если возможно, сделать receiver non-exported.
-  - Либо ограничить permission и валидировать источник интента/UID.
+Для данного кода реалистичны 4 класса атак:
+1. **Локальная компрометация данных** (backup/ADB/форензика устройства).
+2. **Сетевые атаки/MITM** (ослабленная транспортная политика).
+3. **Компонентные атаки Android IPC** (экспортированные activity/receiver).
+4. **Утечки через логи** (PII/токены/данные push/webview).
 
 ---
 
-## 3) Наблюдаемые баги (quality/robustness)
+## 2) Подтвержденные уязвимости (с доказуемой эксплуатацией)
 
-### B-01: Неконтролируемый throw в BroadcastReceiver
-- **Факт:** в `onReceive` есть `throw new IllegalArgumentException("Failed requirement.")` при `intent == null || context == null`.
-- **Где:** `sources/com/chiclaim/android/downloader/SystemDownloadReceiver.java`.
-- **Проблема:** потенциальный crash вместо fail-safe behavior.
-- **Рекомендации:** заменять throw на graceful return + telemetry.
+## V-01 (High): Разрешен cleartext-трафик
+- **Факт:** `android:usesCleartextTraffic="true"`.
+- **Доказательство:** manifest.
+- **Почему это уязвимость:** даже если текущие URL — HTTPS, эта политика разрешает HTTP-трафик и повышает риск downgrade/ошибочных HTTP-эндпоинтов в будущем (в т.ч. через сторонние SDK).
+- **Реальная атака:** злоумышленник в публичной сети перехватывает/модифицирует незашифрованный HTTP-запрос (если такой вызов появится/активируется в runtime).
+- **CWE / OWASP:** CWE-319, MASVS-NETWORK.
+- **Критерии подтверждения уязвимости:**
+  1. `usesCleartextTraffic=true` в release.
+  2. Отсутствует `networkSecurityConfig` deny-by-default.
 
-### B-02: Жестко вшитые ключи/идентификаторы SDK
-- **Факт:** Intercom appId/apiKey и Engagelab appkey заданы строковыми литералами.
-- **Где:** `sources/com/exchange/allin/App.java`, `resources/AndroidManifest.xml`.
-- **Проблема:** не «секреты» в классическом смысле (часто публичные идентификаторы), но облегчают разведку инфраструктуры и abuse.
-- **Рекомендации:** перенос в remote config/build config + ограничение по bundle/package signature на стороне провайдера.
+## V-02 (High): Backup включен глобально + правила backup не ограничены
+- **Факты:**
+  - `android:allowBackup="true"`.
+  - `fullBackupContent="@xml/backup_rules"`, а `backup_rules.xml` пустой (`<full-backup-content/>`).
+  - `data_extraction_rules.xml` разрешает cloud backup (`<cloud-backup/>`).
+- **Почему это уязвимость:** данные приложения могут попадать в резервные копии без исключения секретов.
+- **Реальная атака:** при доступе к устройству/бэкапу злоумышленник извлекает app-data (в т.ч. сессионные артефакты), что облегчает account takeover.
+- **CWE / OWASP:** CWE-312, MASVS-STORAGE.
+- **Критерии подтверждения:**
+  1. Backup включен.
+  2. Нет explicit exclude для чувствительных данных.
+
+## V-03 (High): Локальное хранение сессионных данных в SharedPref-подобном хранилище
+- **Факт:** хранятся `token` и `loginData` в `SharedPref`.
+- **Почему это уязвимость:** при backup/рут-доступе/форензике токен и профиль легко извлекаются; следствие — угон сессии.
+- **Реальная атака:** извлечение локального стора + replay токена к API.
+- **CWE / OWASP:** CWE-922/CWE-312, MASVS-STORAGE.
+- **Критерии подтверждения:**
+  1. Чувствительные поля сохраняются локально.
+  2. Нет доказательств шифрования через Keystore/EncryptedSharedPreferences в видимом коде.
+
+## V-04 (Medium/High): Debug-режим push SDK включен в runtime
+- **Факт:** `MTCorePrivatesApi.configDebugMode(this, true)`.
+- **Реальная атака:** облегченная разведка приложения через расширенные debug-логи и технические артефакты SDK (особенно на userdebug/rooted девайсах, в QA/proxy окружениях).
+- **CWE:** CWE-489.
+- **Критерии:** debug-режим активируется в production code path.
+
+## V-05 (Medium): Утечки через логи (Push/WebView)
+- **Факты:**
+  - Логируется registration id и содержимое push-уведомлений (`notificationMessage.getContent()`).
+  - Логируются WebView console messages (`consoleMessage.message()`).
+- **Реальная атака:** приложения с доступом к логам на компрометированных устройствах/внутренние сборщики логов получают PII/контент/диагностические данные.
+- **CWE:** CWE-532.
+- **Критерии:** наличие несанкционированного вывода пользовательских/служебных данных в логи.
+
+## V-06 (Medium): Экспортированный BroadcastReceiver увеличивает IPC attack surface
+- **Факт:** `com.chiclaim.android.downloader.SystemDownloadReceiver` экспортирован.
+- **Реальная атака:** спуфинг broadcast для провоцирования лишних действий receiver (DoS/навязанные сценарии), хотя риск частично снижен проверкой `download_id` + `DownloadManager`.
+- **CWE:** CWE-926.
+- **Критерии:** exported=true без permission gate.
+
+## V-07 (Medium): Слабый контроль канала обновления (возможна supply-chain подмена при компрометации backend)
+- **Факты:** приложение запрашивает установку пакетов, скачивает APK и инициирует установку через intent/file provider; в видимом коде нет проверки подписи APK перед install-flow.
+- **Реальная атака:** при компрометации backend/канала дистрибуции пользователь получает вредоносный APK для sideload.
+- **Важно:** это не «remote unauthenticated exploit» само по себе — нужен контроль над update source, но это реальный риск цепочки поставки.
+- **CWE:** CWE-494 (Download of Code Without Integrity Check).
+- **Критерии:** отсутствие pin/signature verification в app-side update flow.
+
+## V-08 (Medium): Слишком широкие FileProvider paths (`path="."` + `external-path`)
+- **Факт:** в provider paths разрешены широкие корни (`files/cache/external/...` с `path="."`).
+- **Риск:** повышается blast radius при ошибочной выдаче URI-грантов внешним приложениям.
+- **Реальная атака:** при уязвимости бизнес-логики, выдающей чрезмерные grants, злоумышленник получает доступ к более широкому набору файлов, чем нужно.
+- **CWE:** CWE-732 (Incorrect Permission Assignment for Critical Resource).
 
 ---
 
-## 4) Полный перечень обнаруженных endpoint-ов
+## 3) Реальные атакующие сценарии (как именно атакуют)
 
-## 4.1 Base URL / WS URL
-1. `https://user.allinpro.com/`
-2. `https://api.allinpro.com/`
-3. `wss://ws.allinpro.com/ws`
-4. `https://api.allinpro.com/futures/`
-5. `wss://api.allinpro.com/futures/wsf`
-6. `https://api.allinpro.com/futures1k/`
-7. `wss://api.allinpro.com/futures1k/wsf`
-8. `https://aggapi.allinpro.com/`
-9. `wss://aggapi.allinpro.com/ws/kline`
-10. `https://api.allinpro.com/gateway/`
+## A-01: Session takeover через backup/локальное извлечение
+1. Получение доступа к данным устройства/backup-артефактам.
+2. Извлечение app storage (в т.ч. токена/логин-данных).
+3. Использование токена против API.
+**Импакт:** account takeover, утечка финансовых данных.
 
-## 4.2 REST endpoints (из `GuessService`)
-> Путь относительно `guess` host (`https://api.allinpro.com/gateway/`)
+## A-02: Data disclosure через логи
+1. Сбор логов (rooted/enterprise logging/вредоносный агент на устройстве).
+2. Извлечение push content / registration id / webview console.
+3. Использование данных для фишинга, корреляции пользователя, lateral movement.
+**Импакт:** утечка PII и операционных данных.
+
+## A-03: Broadcast abuse на экспортированном receiver
+1. Отправка crafted broadcast на `SystemDownloadReceiver`.
+2. Триггер workflow обработки download completion.
+3. Спам/DoS или побочные действия UX-потока обновления.
+**Импакт:** нарушение доступности/нежелательные действия.
+
+## A-04: Supply-chain update attack (при компрометации update source)
+1. Компрометация backend/CDN/дистрибуции обновления.
+2. Выдача вредоносного APK вместо легитимного.
+3. Приложение инициирует установку без app-side криптопроверки подписи payload.
+**Импакт:** полная компрометация клиента.
+
+---
+
+## 4) Баги и hardening gaps (не всегда CVE-класс, но опасно)
+
+- `e.printStackTrace()` в DNS-слое → информационные утечки в логах.
+- `IllegalArgumentException` в `onReceive` при null-intent/context → потенциальный crash path.
+- Жестко зашитые идентификаторы SDK (Intercom/EngageLab) → упрощают рекогносцировку инфраструктуры.
+
+---
+
+## 5) Endpoint inventory (максимум, что можно достоверно извлечь из кода)
+
+## 5.1 Base / WS
+- `https://user.allinpro.com/`
+- `https://api.allinpro.com/`
+- `wss://ws.allinpro.com/ws`
+- `https://api.allinpro.com/futures/`
+- `wss://api.allinpro.com/futures/wsf`
+- `https://api.allinpro.com/futures1k/`
+- `wss://api.allinpro.com/futures1k/wsf`
+- `https://aggapi.allinpro.com/`
+- `wss://aggapi.allinpro.com/ws/kline`
+- `https://api.allinpro.com/gateway/`
+
+## 5.2 REST (подтвержденные через Retrofit-аннотации)
+> Относительно guess-host (`https://api.allinpro.com/gateway/`)
 
 - `GET clairvoy/topics/{topicId}`
-  - params: `topicId` (path)
 - `GET clairvoy/categories`
-- `GET clairvoy/topics`
-  - params: `status`, `category_id` (nullable), `page_num`, `page_size`
+- `GET clairvoy/topics` (`status`, `category_id`, `page_num`, `page_size`)
 - `GET clairvoy/topics/hot`
-- `GET clairvoy/account/topics/{topicId}/votes`
-  - params: `topicId`, `page_num`, `page_size`
-- `GET clairvoy/account/topics`
-  - params: `status`, `page_num`, `page_size`
-- `POST clairvoy/account/topics/vote`
-  - body: JSON
-- `POST translation/translate`
-  - body: JSON
+- `GET clairvoy/account/topics/{topicId}/votes` (`page_num`, `page_size`)
+- `GET clairvoy/account/topics` (`status`, `page_num`, `page_size`)
+- `POST clairvoy/account/topics/vote` (JSON body)
+- `POST translation/translate` (JSON body)
 - `GET clairvoy/account/balance`
 - `GET clairvoy/recently-votes`
-- `GET clairvoy/account/transactions`
-  - params: `page_num`, `page_size`
+- `GET clairvoy/account/transactions` (`page_num`, `page_size`)
 - `GET clairvoy/account/topics/{topicId}/transactions`
-  - params: `topicId`
 
 ---
 
-## 5) Критерии приоритизации и acceptance criteria по фиксам
+## 6) Приоритизация исправлений (security acceptance criteria)
 
-## P0 (закрыть до релиза)
-- Отключен cleartext (`usesCleartextTraffic=false`) и добавлен network security config deny-by-default.
-- Секреты/токены вынесены в EncryptedSharedPreferences/Keystore.
-- Backup политика исключает токены/PII (или backup выключен полностью).
+## P0 (до релиза)
+1. `usesCleartextTraffic=false` + `networkSecurityConfig` deny-by-default.
+2. Отключить backup для release **или** явно исключить секреты/PII из backup/data-extraction.
+3. Перевести token/loginData в защищенное хранилище (EncryptedSharedPreferences + Keystore).
+4. Добавить app-side проверку целостности/подписи update payload.
 
 ## P1
-- Убрано debug=true из production-пути и логирование console/webview.
-- Для экспортированных компонентов добавлена минимизация экспозиции (non-exported / permission).
+1. Отключить debug mode SDK в release (`BuildConfig.DEBUG` guard).
+2. Убрать чувствительное логирование (push/webview/stacktrace).
+3. Ужесточить exported-компоненты (permission gates / non-exported где возможно).
+4. Сузить FileProvider paths до минимально необходимого набора директорий.
 
 ## P2
-- Устранены stacktrace/log info leaks.
-- Добавлены security-тесты в CI (manifest lint, semgrep rules, mobSF pipeline).
+1. Ввести CI security gates: lint manifest policy, semgrep/mobsf rules.
+2. Провести dynamic pentest: MITM, component fuzzing (`am broadcast/start`), storage extraction tests.
 
 ---
 
-## 6) Что проверить дополнительно (динамика)
+## 7) Что НЕ могу честно подтвердить только статикой
 
-1. MITM-тест (Burp/Charles + custom CA): убедиться, что HTTP не используется и TLS корректен.
-2. Проверка хранения токена на rooted/non-rooted устройстве, adb backup/auto backup сценарии.
-3. Проверка экспортированных компонентов через `adb shell am broadcast`/`am start`.
-4. Runtime tracing WebView, чтобы подтвердить отсутствие утечек токенов в console.
+- Фактическую эксплуатацию MITM без runtime сетевого трафика.
+- Реальную возможность прочитать логи на production non-root устройстве (зависит от среды/агентов).
+- Полный список API вне `GuessService` (часть сервисов могла быть обфусцирована/сгенерирована).
 
 ---
 
-## 7) Итог
+## 8) Краткий итог
 
-С учетом найденных фактов у приложения есть несколько **реальных high-risk** зон (cleartext policy, storage+backup sensitive data) и ряд **hardening gaps** (debug mode, logging, exported receiver). Для финансового/биржевого приложения рекомендуется закрыть P0/P1 до production rollout.
+По коду подтверждаются **несколько реально опасных уязвимостей** (transport policy, backup+storage, update-chain hardening, logging leakage) и **атакуемые поверхности IPC**. Для финтех/биржевого приложения это критично: закрыть P0/P1 до rollout.
