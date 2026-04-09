@@ -1,9 +1,0 @@
-package com.google.firebase.crashlytics.internal.breadcrumbs;
-
-import androidx.annotation.NonNull;
-
-/* JADX INFO: compiled from: Proguard */
-/* JADX INFO: loaded from: classes2.dex */
-public interface BreadcrumbHandler {
-    void handleBreadcrumb(@NonNull String str);
-}

@@ -1,8 +1,0 @@
-package kotlin.reflect.jvm.internal.impl.builtins;
-
-import kotlin.reflect.jvm.internal.impl.descriptors.PackageFragmentDescriptor;
-
-/* JADX INFO: compiled from: Proguard */
-/* JADX INFO: loaded from: classes3.dex */
-public interface BuiltInsPackageFragment extends PackageFragmentDescriptor {
-}
